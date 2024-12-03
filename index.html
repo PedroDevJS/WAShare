@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hidden { display: none; }
+        .active-toggle { background-color: #25D366; color: white; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+    <h1 class="text-3xl font-bold text-center text-green-500 mb-6">WAShare</h1>
+
+    <div class="flex justify-center mb-6">
+        <button id="specificBtn" class="toggle-btn active-toggle px-4 py-2 rounded-l-lg">Número Específico</button>
+        <button id="shareBtn" class="toggle-btn px-4 py-2 rounded-r-lg bg-gray-200">Mensagem Compartilhável</button>
+    </div>
+
+    <div id="specificForm">
+        <input type="text" id="phone" placeholder="Número de WhatsApp com DDD" class="w-full p-2 mb-4 border rounded">
+        <input type="text" id="text" placeholder="Mensagem" class="w-full p-2 mb-4 border rounded">
+        <button onclick="generateLink()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Gerar Link</button>
+    </div>
+
+    <div id="shareForm" class="hidden">
+        <input type="text" id="shareText" placeholder="Mensagem para compartilhar" class="w-full p-2 mb-4 border rounded">
+        <button onclick="generateShareLink()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Gerar Link de Compartilhamento</button>
+    </div>
+
+    <div id="result" class="mt-6 hidden">
+        <input id="whatsappLink" type="text" readonly class="w-full p-2 mb-4 border rounded">
+        <button onclick="copyToClipboard()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 mb-4">Copiar Link</button>
+        <img id="qrCode" class="mx-auto hidden" alt="QR Code do link gerado" />
+    </div>
+</div>
+
+<script>
+    document.getElementById('specificBtn').addEventListener('click', () => toggleForms('specific'));
+    document.getElementById('shareBtn').addEventListener('click', () => toggleForms('share'));
+
+    function toggleForms(mode) {
+        const specificForm = document.getElementById('specificForm');
+        const shareForm = document.getElementById('shareForm');
+        document.getElementById('result').classList.add('hidden');
+
+        if (mode === 'specific') {
+            specificForm.classList.remove('hidden');
+            shareForm.classList.add('hidden');
+            setActiveToggle('specificBtn');
+        } else {
+            shareForm.classList.remove('hidden');
+            specificForm.classList.add('hidden');
+            setActiveToggle('shareBtn');
+        }
+    }
+
+    function setActiveToggle(activeId) {
+        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active-toggle'));
+        document.getElementById(activeId).classList.add('active-toggle');
+    }
+
+    function generateLink() {
+        const phone = document.getElementById('phone').value;
+        const text = document.getElementById('text').value;
+        const link = `https://api.whatsapp.com/send?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}`;
+        showResult(link);
+    }
+
+    function generateShareLink() {
+        const text = document.getElementById('shareText').value;
+        const link = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        showResult(link);
+    }
+
+    function showResult(link) {
+        const resultBox = document.getElementById('result');
+        const qrCode = document.getElementById('qrCode');
+        document.getElementById('whatsappLink').value = link;
+        qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200`;
+        qrCode.classList.remove('hidden');
+        resultBox.classList.remove('hidden');
+    }
+
+    function copyToClipboard() {
+        const linkInput = document.getElementById('whatsappLink');
+        linkInput.select();
+        document.execCommand('copy');
+        alert('Link copiado para a área de transferência!');
+    }
+</script>
+
+</body>
+</html>
